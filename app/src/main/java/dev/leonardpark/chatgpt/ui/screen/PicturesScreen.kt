@@ -2,6 +2,7 @@ package dev.leonardpark.chatgpt.ui.screen
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,12 +17,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
@@ -32,7 +37,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -62,7 +69,8 @@ fun PicturesScreen(navController: NavController) {
 
     val images by viewModel.generatedImages.collectAsStateWithLifecycle(initialValue = emptyList())
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     Column {
         LargeTopAppBar(
@@ -81,6 +89,20 @@ fun PicturesScreen(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
+                    SuggestionsTextField(
+                        modifier = Modifier.padding(
+                            top = 3.dp,
+                            start = 10.dp,
+                            end = 10.dp,
+                            bottom = 10.dp
+                        ),
+                        options = viewModel.models,
+                        value = viewModel.model,
+                        setValue = { viewModel.model = it },
+                        hint = R.string.model,
+                        viewModel = viewModel
+                    )
+
                     OutlinedTextField(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -188,5 +210,61 @@ fun PicturesScreen(navController: NavController) {
         }
 
         ErrorAlertDialog(viewModel = viewModel)
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+private fun LazyItemScope.SuggestionsTextField(
+    modifier: Modifier = Modifier.padding(10.dp),
+    options: List<String>,
+    value: String,
+    setValue: (String) -> Unit,
+    @StringRes hint: Int,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    viewModel: PicturesViewModel
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        modifier = modifier
+            .fillMaxWidth()
+            .animateItemPlacement(),
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            value = value,
+            onValueChange = setValue,
+            enabled = !viewModel.loading,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            },
+            label = { Text(text = stringResource(hint)) },
+            shape = RoundedCornerShape(12.dp),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { selectionOption ->
+                DropdownMenuItem(
+                    onClick = {
+                        setValue(selectionOption)
+                        expanded = false
+                    },
+                    text = { Text(text = selectionOption) }
+                )
+            }
+        }
     }
 }

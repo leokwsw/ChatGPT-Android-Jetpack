@@ -9,13 +9,13 @@
     <string name="api_key">API Key</string>
     <string name="setup">Setup</string>
     <string name="model">Model</string>
-    <string name="picture">Picture</string>
-    <string name="pictures">Pictures</string>
+    <!--    <string name="picture">Picture</string>-->
+    <string name="pictures">DALL·E 3</string>
     <string name="download_started">Download started</string>
     <string name="delete">Delete</string>
     <string name="prompt">Prompt</string>
     <string name="temperature">Temperature</string>
-    <string name="audio">Audio</string>
+    <string name="audio">TTS</string>
     <string name="voice">Voice</string>
     <string name="text">Text</string>
     <string name="speed">Speed</string>

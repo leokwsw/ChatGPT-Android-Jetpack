@@ -1,5 +1,6 @@
 package dev.leonardpark.chatgpt.repository.network
 
+import com.google.gson.Gson
 import dev.leonardpark.chatgpt.database.entity.ChatMessage
 import dev.leonardpark.chatgpt.model.network.request.GenerateAudioRequestBody
 import dev.leonardpark.chatgpt.model.network.request.GenerateImageRequestBody
@@ -8,7 +9,6 @@ import dev.leonardpark.chatgpt.model.network.response.GenerateMessagesResponse
 import dev.leonardpark.chatgpt.repository.base.BaseRepository
 import dev.leonardpark.chatgpt.repository.network.service.OpenAIService
 import dev.leonardpark.chatgpt.store.datastore.SettingsDataStore
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
@@ -46,8 +46,8 @@ class OpenAIRepository @Inject constructor(
         }
     }.body()
 
-    suspend fun generateImage(prompt: String) = openAIService.generateImage(
-        GenerateImageRequestBody(prompt)
+    suspend fun generateImage(model: String, prompt: String) = openAIService.generateImage(
+        GenerateImageRequestBody(model, prompt)
     ).data.first().url
 
     suspend fun generateMessagesStream(messages: List<ChatMessage>) = flow {

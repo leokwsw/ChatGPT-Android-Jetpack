@@ -8,11 +8,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.leonardpark.chatgpt.database.AppDatabase
 import dev.leonardpark.chatgpt.database.entity.GeneratedImage
 import dev.leonardpark.chatgpt.repository.network.OpenAIRepository
 import dev.leonardpark.chatgpt.viewmodel.base.BaseViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -27,7 +27,8 @@ class PicturesViewModel @Inject constructor(
     val imageLoader: ImageLoader,
     application: Application
 ): BaseViewModel(application) {
-
+    var models = listOf("dall-e-3", "dall-e-2")
+    var model by mutableStateOf("dall-e-3")
     var query by mutableStateOf("")
     var loading by mutableStateOf(false)
 
@@ -43,7 +44,7 @@ class PicturesViewModel @Inject constructor(
             withContext(Dispatchers.Main) {
                 loading = true
             }
-            val imageUrl = openAIRepository.generateImage(query)
+            val imageUrl = openAIRepository.generateImage(model, query)
 
             withContext(Dispatchers.Main) {
                 loading = false
